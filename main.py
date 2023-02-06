@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 DATABASE_NAME = "hotel"
 COLLECTION_NAME = "reservation"
-MONGODB_URL = "mongodb://localhost"
-MONGODB_PORT = 27017
+MONGO_DB_URL = "mongodb://localhost"
+MONGO_DB_PORT = 27017
 
 
 class Reservation(BaseModel):
@@ -16,13 +16,27 @@ class Reservation(BaseModel):
     room_id: int
 
 
-client = MongoClient(MONGODB_URL, MONGODB_PORT)
+client = MongoClient(f"{MONGO_DB_URL}:{MONGO_DB_PORT}")
 
 db = client[DATABASE_NAME]
 
 collection = db[COLLECTION_NAME]
 
 app = FastAPI()
+
+
+def room_avaliable(room_id: int, start_date: str, end_date: str):
+    query={"room_id": room_id,
+           "$or": 
+                [{"$and": [{"start_date": {"$lte": start_date}}, {"end_date": {"$gte": start_date}}]},
+                 {"$and": [{"start_date": {"$lte": end_date}}, {"end_date": {"$gte": end_date}}]},
+                 {"$and": [{"start_date": {"$gte": start_date}}, {"end_date": {"$lte": end_date}}]}]
+            }
+    
+    result = collection.find(query, {"_id": 0})
+    list_cursor = list(result)
+
+    return not len(list_cursor) > 0
 
 
 @app.get("/reservation/by-name/{name}")

@@ -22,7 +22,7 @@ mock_name1 = "John Doe"
 
 
 def connect_mongodb():
-    client = MongoClient(MONGO_DB_URL, MONGO_DB_PORT)
+    client = MongoClient(f"{MONGO_DB_URL}:{MONGO_DB_PORT}")
     global db; db = client[DATABASE_NAME]
     global collection; collection = db[COLLECTION_NAME]
 
